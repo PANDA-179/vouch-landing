@@ -1,0 +1,551 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>VOUCH — Know if a COD order will be returned, before you ship it</title>
+<meta name="description" content="VOUCH scores Egyptian cash-on-delivery orders for return risk in seconds, so you ship with confidence instead of guessing.">
+<meta property="og:title" content="VOUCH — COD return-risk scoring for Egypt">
+<meta property="og:description" content="Know if a cash-on-delivery order will be returned before you ship it.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+/* ---------- tokens ---------- */
+:root{
+  --bg:#0a0d1a; --fg:#f4f4f5; --muted:#a1a1aa; --card:rgba(255,255,255,.045);
+  --line:rgba(255,255,255,.10); --line-strong:rgba(255,255,255,.18);
+  --accept:#34d399; --review:#fbbf24; --reject:#fb7185;
+  --blob1:#4f46e5; --blob2:#6366f1; --blob3:#7c74e8; --blob4:#4338ca;
+  --blob-op:.55; --blob-blur:clamp(50px,7vmin,95px); --veil:rgba(10,13,26,.62); --grain-op:.07;
+  --radius:14px;
+}
+html[data-theme="light"]{
+  --bg:#f4f5fb; --fg:#18181b; --muted:#52525b; --card:rgba(255,255,255,.72);
+  --line:rgba(24,24,27,.10); --line-strong:rgba(24,24,27,.16);
+  --accept:#059669; --review:#b45309; --reject:#e11d48;
+  --blob1:#818cf8; --blob2:#6366f1; --blob3:#a5b4fc; --blob4:#6d78f0;
+  --blob-op:.5; --blob-blur:clamp(45px,6.5vmin,85px); --veil:rgba(244,245,251,.62); --grain-op:.05;
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%; scroll-behavior:smooth}
+body{
+  margin:0; background:var(--bg); color:var(--fg);
+  font-family:Inter,ui-sans-serif,system-ui,-apple-system,sans-serif;
+  -webkit-font-smoothing:antialiased; line-height:1.6; letter-spacing:-.01em;
+  overflow-x:hidden;
+}
+a{color:inherit}
+button,input,select{font:inherit; touch-action:manipulation; -webkit-tap-highlight-color:transparent}
+h1,h2,h3{font-optical-sizing:auto; margin:0}
+h1{font-size:clamp(2.1rem,6vw,4rem); line-height:1.05; letter-spacing:-.032em; font-weight:700}
+h2{font-size:clamp(1.5rem,3.4vw,2.3rem); line-height:1.15; letter-spacing:-.024em; font-weight:600}
+h3{font-size:1.05rem; line-height:1.3; letter-spacing:-.016em; font-weight:600}
+p{margin:0}
+.eyebrow{font-size:.75rem; font-weight:500; letter-spacing:.09em; text-transform:uppercase; color:var(--muted)}
+.muted{color:var(--muted)}
+.wrap{width:100%; max-width:1080px; margin-inline:auto; padding-inline:20px}
+
+/* ---------- animated background ---------- */
+.stage{position:fixed; inset:0; z-index:-1; overflow:hidden; pointer-events:none; background:var(--bg)}
+.layer{position:absolute; inset:0; will-change:transform;
+  transform:translate3d(calc(var(--mx,0) * var(--depth,0px)),calc(var(--my,0) * var(--depth,0px)),0)}
+.l1{--depth:26px}.l2{--depth:-34px}.l3{--depth:16px}.l4{--depth:-20px}
+.blob{position:absolute; border-radius:9999px; opacity:var(--blob-op); filter:blur(var(--blob-blur)); will-change:transform}
+.b1{width:clamp(240px,30vmin,460px); aspect-ratio:1; top:-12%; left:-8%; background:var(--blob1)}
+.b2{width:clamp(280px,36vmin,560px); aspect-ratio:1; bottom:-18%; right:-10%; background:var(--blob2)}
+.b3{width:clamp(200px,26vmin,400px); aspect-ratio:1; top:32%; left:38%; background:var(--blob3)}
+.b4{width:clamp(220px,28vmin,420px); aspect-ratio:1; top:-6%; right:18%; background:var(--blob4)}
+@media (prefers-reduced-motion:no-preference){
+  .b1{animation:d1 16s ease-in-out infinite}.b2{animation:d2 20s ease-in-out infinite}
+  .b3{animation:d3 14s ease-in-out infinite}.b4{animation:d4 18s ease-in-out infinite}
+}
+@keyframes d1{0%,100%{transform:translate3d(0,0,0) scale(1)}30%{transform:translate3d(50px,40px,0) scale(1.12)}60%{transform:translate3d(-30px,70px,0) scale(.94)}}
+@keyframes d2{0%,100%{transform:translate3d(0,0,0) scale(1)}35%{transform:translate3d(-60px,-30px,0) scale(1.1)}70%{transform:translate3d(-20px,-70px,0) scale(.9)}}
+@keyframes d3{0%,100%{transform:translate3d(0,0,0) scale(1)}25%{transform:translate3d(40px,-50px,0) scale(1.15)}55%{transform:translate3d(-50px,20px,0) scale(.92)}80%{transform:translate3d(30px,40px,0) scale(1.05)}}
+@keyframes d4{0%,100%{transform:translate3d(0,0,0) scale(1)}40%{transform:translate3d(-45px,55px,0) scale(1.08)}75%{transform:translate3d(35px,25px,0) scale(.95)}}
+.veil{position:absolute; inset:0; background:radial-gradient(ellipse 70% 60% at 50% 50%,var(--veil) 0%,transparent 70%)}
+.grain{position:absolute; inset:0; opacity:var(--grain-op); mix-blend-mode:overlay;
+  background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='140' height='140'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3' stitchTiles='stitch'/></filter><rect width='140' height='140' filter='url(%23n)'/></svg>")}
+
+/* ---------- surfaces ---------- */
+.glass{background:var(--card); -webkit-backdrop-filter:blur(20px) saturate(180%); backdrop-filter:blur(20px) saturate(180%); border-bottom:1px solid var(--line)}
+.card{background:var(--card); border:1px solid var(--line); border-radius:var(--radius);
+  -webkit-backdrop-filter:blur(14px) saturate(150%); backdrop-filter:blur(14px) saturate(150%)}
+
+/* ---------- nav ---------- */
+nav{position:sticky; top:0; z-index:40}
+.navbar{display:flex; align-items:center; justify-content:space-between; gap:12px; height:60px}
+.brand{display:flex; align-items:center; gap:9px; font-weight:700; letter-spacing:-.02em; font-size:1.06rem; text-decoration:none}
+.mark{width:26px; height:26px; border-radius:8px; display:grid; place-items:center;
+  background:linear-gradient(150deg,var(--blob2),var(--blob4)); color:#fff; font-size:.78rem; font-weight:700}
+.navactions{display:flex; align-items:center; gap:8px}
+.hide-sm{display:inline-flex}
+@media (max-width:560px){.hide-sm{display:none}}
+
+/* ---------- buttons ---------- */
+.btn{display:inline-flex; align-items:center; justify-content:center; gap:8px; cursor:pointer;
+  border-radius:999px; border:1px solid transparent; padding:11px 20px; font-size:.9rem; font-weight:600;
+  letter-spacing:-.01em; transition:transform .1s ease-out,background-color .15s,border-color .15s,opacity .15s;
+  text-decoration:none; white-space:nowrap}
+.btn:active{transform:scale(.97)}
+.btn:focus-visible{outline:2px solid var(--fg); outline-offset:2px}
+.btn-primary{background:var(--fg); color:var(--bg)}
+.btn-primary:hover{opacity:.88}
+.btn-ghost{background:transparent; border-color:var(--line-strong); color:var(--fg)}
+.btn-ghost:hover{background:var(--card)}
+.btn-sm{padding:8px 14px; font-size:.83rem}
+.icon-btn{width:38px; height:38px; padding:0; border-radius:999px; background:transparent;
+  border:1px solid var(--line-strong); color:var(--fg); cursor:pointer;
+  display:grid; place-items:center; transition:transform .1s ease-out,background-color .15s}
+.icon-btn:active{transform:scale(.94)}
+.icon-btn:hover{background:var(--card)}
+.icon-btn:focus-visible{outline:2px solid var(--fg); outline-offset:2px}
+@media (pointer:coarse){.icon-btn{min-width:44px;min-height:44px}}
+
+/* ---------- sections ---------- */
+section{padding:clamp(56px,9vw,110px) 0}
+.hero{padding-top:clamp(40px,7vw,80px); text-align:center}
+.hero h1{margin:16px auto 0; max-width:16ch}
+.hero .sub{margin:20px auto 0; max-width:56ch; font-size:clamp(1rem,1.6vw,1.16rem); color:var(--muted)}
+.hero .cta{margin-top:32px; display:flex; gap:12px; justify-content:center; flex-wrap:wrap}
+.trustline{margin-top:34px; display:flex; gap:10px 26px; justify-content:center; flex-wrap:wrap; font-size:.84rem; color:var(--muted)}
+.trustline span{display:inline-flex; align-items:center; gap:7px}
+.dot{width:6px;height:6px;border-radius:99px;background:var(--accept);flex:none}
+
+.grid3{display:grid; gap:16px; grid-template-columns:repeat(auto-fit,minmax(240px,1fr))}
+.step{padding:24px}
+.stepnum{width:30px;height:30px;border-radius:9px;display:grid;place-items:center;font-size:.82rem;font-weight:700;
+  background:color-mix(in oklab,var(--blob2) 30%,transparent); color:var(--fg); margin-bottom:14px}
+.step p{margin-top:8px; color:var(--muted); font-size:.94rem}
+
+/* ---------- demo ---------- */
+.demo{display:grid; gap:18px; grid-template-columns:1.15fr .85fr; align-items:start}
+@media (max-width:860px){.demo{grid-template-columns:1fr}}
+.panel{padding:22px}
+.presets{display:flex; gap:8px; flex-wrap:wrap; margin-bottom:18px}
+.chip{cursor:pointer; border-radius:999px; padding:7px 13px; font-size:.8rem; font-weight:500;
+  background:transparent; border:1px solid var(--line-strong); color:var(--muted);
+  transition:transform .1s ease-out,color .15s,border-color .15s,background-color .15s}
+.chip:hover{color:var(--fg); background:var(--card)}
+.chip:active{transform:scale(.96)}
+.chip:focus-visible{outline:2px solid var(--fg); outline-offset:2px}
+.chip[aria-pressed="true"]{color:var(--fg); border-color:var(--fg); background:var(--card)}
+.fields{display:grid; gap:14px; grid-template-columns:1fr 1fr}
+@media (max-width:520px){.fields{grid-template-columns:1fr}}
+.field{display:flex; flex-direction:column; gap:6px}
+.field label{font-size:.79rem; font-weight:500; color:var(--muted)}
+.field select,.field input[type=number]{width:100%; padding:10px 12px; border-radius:10px; color:var(--fg);
+  background:color-mix(in oklab,var(--bg) 55%,transparent); border:1px solid var(--line-strong);
+  transition:border-color .15s}
+.field select:focus,.field input:focus{outline:none; border-color:var(--fg)}
+.field select option{background:var(--bg); color:var(--fg)}
+.field input[type=range]{width:100%; accent-color:var(--fg)}
+.span2{grid-column:1/-1}
+
+.result{padding:22px; position:sticky; top:76px}
+.verdict{display:flex; align-items:baseline; justify-content:space-between; gap:12px}
+.verdict .label{font-size:1.32rem; font-weight:700; letter-spacing:-.022em}
+.pct{font-size:2.5rem; font-weight:700; letter-spacing:-.03em; font-variant-numeric:tabular-nums; line-height:1}
+.bar{height:8px; border-radius:99px; background:color-mix(in oklab,var(--fg) 12%,transparent); margin:16px 0 6px; overflow:hidden}
+.bar>i{display:block; height:100%; border-radius:99px; width:0; transition:width .5s cubic-bezier(.22,1,.36,1),background-color .3s}
+.scale{display:flex; justify-content:space-between; font-size:.7rem; color:var(--muted)}
+.action{margin-top:16px; padding:12px 14px; border-radius:11px; font-size:.9rem; font-weight:500;
+  border-inline-start:3px solid currentColor}
+.reasons{margin:16px 0 0; padding:0; list-style:none; display:flex; flex-direction:column; gap:8px}
+.reasons li{display:flex; gap:9px; font-size:.87rem; color:var(--muted); align-items:flex-start}
+.reasons li b{color:var(--fg); font-weight:600}
+.arrow{flex:none; opacity:.75}
+.disclaimer{margin-top:18px; padding-top:14px; border-top:1px solid var(--line); font-size:.76rem; color:var(--muted); line-height:1.55}
+
+/* ---------- proof ---------- */
+.stats{display:grid; gap:16px; grid-template-columns:repeat(auto-fit,minmax(170px,1fr))}
+.stat{padding:20px}
+.stat .v{font-size:1.85rem; font-weight:700; letter-spacing:-.028em; font-variant-numeric:tabular-nums; margin-top:6px}
+.stat .d{font-size:.82rem; color:var(--muted); margin-top:6px; line-height:1.5}
+
+.cta-final{text-align:center; padding:clamp(34px,5vw,54px) 24px}
+.cta-final .cta{margin-top:24px; display:flex; gap:12px; justify-content:center; flex-wrap:wrap}
+footer{padding:34px 0 46px; border-top:1px solid var(--line); font-size:.82rem; color:var(--muted)}
+.foot{display:flex; justify-content:space-between; gap:14px; flex-wrap:wrap; align-items:center}
+
+@media (prefers-reduced-motion:reduce){
+  html{scroll-behavior:auto}
+  *,*::before,*::after{animation-duration:.001ms !important; animation-iteration-count:1 !important; transition-duration:.001ms !important}
+}
+@media (prefers-reduced-transparency:reduce){
+  .glass,.card{background:var(--bg); -webkit-backdrop-filter:none; backdrop-filter:none}
+}
+@media (prefers-contrast:more){
+  .glass,.card{background:var(--bg); border-color:var(--fg)}
+}
+</style>
+</head>
+<body>
+
+<div class="stage" aria-hidden="true" id="stage">
+  <div class="layer l1"><div class="blob b1"></div></div>
+  <div class="layer l2"><div class="blob b2"></div></div>
+  <div class="layer l3"><div class="blob b3"></div></div>
+  <div class="layer l4"><div class="blob b4"></div></div>
+  <div class="veil"></div><div class="grain"></div>
+</div>
+
+<nav>
+  <div class="glass">
+    <div class="wrap">
+      <div class="navbar">
+        <a class="brand" href="#top"><span class="mark">V</span>VOUCH</a>
+        <div class="navactions">
+          <button class="icon-btn" id="theme" aria-label="Toggle dark mode" title="Toggle dark mode">
+            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path id="themePath" d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+          </button>
+          <a class="btn btn-ghost btn-sm hide-sm" id="signin" href="#">Sign in</a>
+          <a class="btn btn-primary btn-sm" href="#access">Request access</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</nav>
+
+<main id="top">
+
+  <section class="hero wrap">
+    <p class="eyebrow">COD return-risk scoring · Egypt</p>
+    <h1>Know if an order will be returned, before you ship it.</h1>
+    <p class="sub">Roughly one in three cash-on-delivery orders in Egypt comes back. VOUCH scores each order in seconds and tells you whether to ship COD, confirm first, or ask for payment up front.</p>
+    <div class="cta">
+      <a class="btn btn-primary" href="#demo">Try it now — no signup</a>
+      <a class="btn btn-ghost" href="#how">See how it works</a>
+    </div>
+    <div class="trustline">
+      <span><i class="dot"></i>Trained on Egyptian COD data</span>
+      <span><i class="dot"></i>Phone numbers hashed, never stored</span>
+      <span><i class="dot"></i>PDPL-aligned</span>
+    </div>
+  </section>
+
+  <section id="how" class="wrap">
+    <p class="eyebrow">How it works</p>
+    <h2 style="margin-top:12px">Three steps, about two seconds.</h2>
+    <div class="grid3" style="margin-top:30px">
+      <div class="card step"><div class="stepnum">1</div><h3>Send the order</h3><p>Governorate, area, value, category, channel — fields you already collect at checkout. Nothing extra for the buyer to do.</p></div>
+      <div class="card step"><div class="stepnum">2</div><h3>VOUCH scores it</h3><p>An ensemble of three models weighs location history, discount depth, order value, sales channel, and how this buyer behaved with your brand before.</p></div>
+      <div class="card step"><div class="stepnum">3</div><h3>You get a decision</h3><p>Not just a number — a recommended action: ship cash on delivery, confirm by phone first, or ask for prepayment.</p></div>
+    </div>
+  </section>
+
+  <section id="demo" class="wrap">
+    <p class="eyebrow">Live demo</p>
+    <h2 style="margin-top:12px">Score an order yourself.</h2>
+    <p class="muted" style="margin-top:10px;max-width:60ch">Change anything below and the verdict updates instantly. Start from a preset if you are in a hurry.</p>
+
+    <div class="demo" style="margin-top:26px">
+      <div class="card panel">
+        <div class="presets" id="presets">
+          <button class="chip" type="button" data-preset="safe" aria-pressed="false">Low-risk example</button>
+          <button class="chip" type="button" data-preset="review" aria-pressed="false">Needs confirming</button>
+          <button class="chip" type="button" data-preset="risky" aria-pressed="false">High-risk example</button>
+        </div>
+        <div class="fields">
+          <div class="field"><label for="gov">Governorate</label><select id="gov"></select></div>
+          <div class="field"><label for="cat">Category</label><select id="cat"></select></div>
+          <div class="field"><label for="chan">Sales channel</label><select id="chan"></select></div>
+          <div class="field"><label for="cust">Customer</label><select id="cust">
+            <option value="new">New — first order</option>
+            <option value="repeat_good">Returning — always accepted</option>
+            <option value="repeat_bad">Returning — has refused before</option>
+          </select></div>
+          <div class="field"><label for="value">Order value (EGP)</label><input id="value" type="number" min="50" max="20000" step="50" value="850"></div>
+          <div class="field"><label for="items">Items</label><input id="items" type="number" min="1" max="20" value="1"></div>
+          <div class="field span2"><label for="disc">Discount — <span id="discOut">0</span>%</label><input id="disc" type="range" min="0" max="60" step="5" value="0"></div>
+        </div>
+      </div>
+
+      <div class="card result">
+        <div class="verdict">
+          <span class="label" id="vLabel">—</span>
+          <span class="pct" id="vPct">—</span>
+        </div>
+        <div class="bar"><i id="vBar"></i></div>
+        <div class="scale"><span>0% · safe</span><span>100% · risk</span></div>
+        <p class="action" id="vAction" role="status" aria-live="polite"></p>
+        <ul class="reasons" id="vReasons"></ul>
+        <p class="disclaimer">This demo runs a simplified model in your browser, so it works without an account. It matches the full VOUCH model on <b>76%</b> of orders and never turns a high-risk order into a safe one — but production scoring is more accurate. <a href="#access"><b>Request access</b></a> for the real thing.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="wrap">
+    <p class="eyebrow">Why trust the number</p>
+    <h2 style="margin-top:12px">Measured, not claimed.</h2>
+    <div class="stats" style="margin-top:28px">
+      <div class="card stat"><p class="eyebrow">Model AUC</p><div class="v">0.72</div><p class="d">Measured on 4,000 held-out orders, split by time — the model never saw them in training.</p></div>
+      <div class="card stat"><p class="eyebrow">Ensemble</p><div class="v">3 models</div><p class="d">CatBoost, histogram gradient boosting and logistic regression, blended and calibrated.</p></div>
+      <div class="card stat"><p class="eyebrow">Egypt COD returns</p><div class="v">25–35%</div><p class="d">The baseline this is built for — well above the Gulf average of 10–25%.</p></div>
+      <div class="card stat"><p class="eyebrow">Privacy</p><div class="v">Hashed</div><p class="d">Phone numbers are salted and hashed at the edge. The raw number is never stored.</p></div>
+    </div>
+  </section>
+
+  <section id="access" class="wrap">
+    <div class="card cta-final">
+      <h2>Stop shipping orders that come back.</h2>
+      <p class="muted" style="margin:14px auto 0;max-width:48ch">Tell us about your store and we will set you up. Egyptian sellers only, for now.</p>
+      <div class="cta">
+        <a class="btn btn-primary" id="waBtn" href="#">Request access on WhatsApp</a>
+        <a class="btn btn-ghost" id="mailBtn" href="#">Or email us</a>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer class="wrap">
+  <div class="foot">
+    <span>© <span id="yr"></span> VOUCH — COD return-risk scoring for Egypt.</span>
+    <span>Built for Egyptian e-commerce.</span>
+  </div>
+</footer>
+
+<script>
+/* ============================================================================
+   CONFIGURE ME
+   Put your WhatsApp number below and this page is finished.
+   International format, digits only — no "+", no spaces.
+   Egypt example: "201012345678"
+   Leave it empty and the button falls back to email automatically.
+   ============================================================================ */
+var WHATSAPP_NUMBER = "201030808048";
+var CONTACT_EMAIL   = "vouch.ytp@gmail.com";
+var APP_URL         = "https://vouch-web-c4pw.onrender.com/admin/login";
+
+/* ----------------------------------------------------------------------------
+   DEMO MODEL
+   These coefficients are not invented. They were distilled from the real VOUCH
+   ensemble (CatBoost + HistGradientBoosting + LogisticRegression) by scoring a
+   wide grid of orders with the production model and fitting an additive model to
+   its output in log-odds space. Regenerate with:
+       python landing/extract_demo_model.py > landing/demo-model.json
+   Held-out check vs the real model: 76.1% tier agreement, r = 0.83,
+   and zero cases where safe/high-risk were flipped.
+   ---------------------------------------------------------------------------- */
+var MODEL = {
+  intercept: -4.807231,
+  log_value: 0.54941,
+  discount: 2.505302,
+  items: -0.002776,
+  gov: {"Alexandria":-0.242527,"Beheira":0.261306,"Cairo":-0.178363,"Dakahlia":-0.109038,
+        "Gharbia":0.029684,"Giza":-0.378348,"Qalyubia":0.496454,"Sharqia":0.120832},
+  category: {"beauty":-0.054756,"electronics":-0.164151,"fashion":0.205605,"home":-0.096919,
+             "mobile_accessories":-0.102191,"supplements":0.212412},
+  channel: {"facebook":-0.128666,"instagram":0.068522,"tiktok":0.266438,
+            "website":-0.125849,"whatsapp":-0.080445},
+  customer: {"new":0.480344,"repeat_bad":-0.007576,"repeat_good":-0.472768}
+};
+
+var LABELS = {
+  category: {fashion:"Fashion", electronics:"Electronics", mobile_accessories:"Mobile accessories",
+             home:"Home", beauty:"Beauty", supplements:"Supplements"},
+  channel:  {instagram:"Instagram", facebook:"Facebook", website:"Website",
+             tiktok:"TikTok", whatsapp:"WhatsApp"}
+};
+
+/* ---------- scoring ---------- */
+function score(o){
+  var z = MODEL.intercept
+        + (MODEL.gov[o.gov] || 0)
+        + (MODEL.category[o.cat] || 0)
+        + (MODEL.channel[o.chan] || 0)
+        + (MODEL.customer[o.cust] || 0)
+        + MODEL.log_value * Math.log(1 + o.value)
+        + MODEL.discount * (o.disc / 100)
+        + MODEL.items * o.items;
+  return 1 / (1 + Math.exp(-z));
+}
+
+// Same bands the product uses: below 20% ship, below 50% confirm, otherwise prepay.
+function tierOf(p){ return p < 0.20 ? "low" : (p < 0.50 ? "med" : "high"); }
+
+var TIER = {
+  low:  {label:"Accept",  color:"var(--accept)", action:"Safe to ship cash on delivery."},
+  med:  {label:"Review",  color:"var(--review)", action:"Confirm by phone or WhatsApp before you ship."},
+  high: {label:"Reject",  color:"var(--reject)", action:"Ask for prepayment or a deposit before shipping."}
+};
+
+/* Explain the score by ranking each factor's actual contribution in log-odds —
+   the same idea as the product's top-reasons, computed from this model. */
+function reasons(o){
+  var base = { gov: avg(MODEL.gov), cat: avg(MODEL.category),
+               chan: avg(MODEL.channel), cust: avg(MODEL.customer) };
+  var parts = [
+    {k:"Discount",  v: MODEL.discount * (o.disc/100) - MODEL.discount * 0.15,
+     up:"A " + o.disc + "% discount attracts impulse orders that get refused.",
+     down:"Little or no discount — fewer impulse buyers."},
+    {k:"Customer",  v: (MODEL.customer[o.cust]||0) - base.cust,
+     up: o.cust === "repeat_bad" ? "This buyer has refused a delivery before."
+                                 : "First order from this buyer — no history to trust yet.",
+     down:"A returning buyer who has always accepted delivery."},
+    {k:"Order value", v: MODEL.log_value * Math.log(1+o.value) - MODEL.log_value * Math.log(1+900),
+     up:"Higher-value orders are refused more often at the door.",
+     down:"A modest order value — easier for the buyer to accept."},
+    {k:"Governorate", v: (MODEL.gov[o.gov]||0) - base.gov,
+     up: o.gov + " has a higher return rate than average.",
+     down: o.gov + " has a lower return rate than average."},
+    {k:"Channel", v: (MODEL.channel[o.chan]||0) - base.chan,
+     up: (LABELS.channel[o.chan]||o.chan) + " orders are more impulsive than average.",
+     down: (LABELS.channel[o.chan]||o.chan) + " buyers tend to be more deliberate."},
+    {k:"Category", v: (MODEL.category[o.cat]||0) - base.cat,
+     up: (LABELS.category[o.cat]||o.cat) + " sees more size and expectation returns.",
+     down: (LABELS.category[o.cat]||o.cat) + " is returned less often than average."}
+  ];
+  parts.sort(function(a,b){ return Math.abs(b.v) - Math.abs(a.v); });
+  return parts.slice(0,3).map(function(p){
+    return { up: p.v > 0, text: p.v > 0 ? p.up : p.down };
+  });
+}
+function avg(obj){ var k = Object.keys(obj), s = 0; for (var i=0;i<k.length;i++) s += obj[k[i]]; return s/k.length; }
+
+/* ---------- wiring ---------- */
+var $ = function(id){ return document.getElementById(id); };
+
+function fillSelect(el, keys, labels){
+  el.innerHTML = keys.map(function(k){
+    return '<option value="' + k + '">' + ((labels && labels[k]) || k) + '</option>';
+  }).join("");
+}
+fillSelect($("gov"),  Object.keys(MODEL.gov).sort());
+fillSelect($("cat"),  Object.keys(MODEL.category), LABELS.category);
+fillSelect($("chan"), Object.keys(MODEL.channel),  LABELS.channel);
+
+var PRESETS = {
+  safe:   {gov:"Giza",     cat:"electronics", chan:"website",   cust:"repeat_good", value:600,  disc:0,  items:1},
+  review: {gov:"Cairo",    cat:"fashion",     chan:"instagram", cust:"new",         value:750,  disc:0,  items:1},
+  risky:  {gov:"Qalyubia", cat:"fashion",     chan:"tiktok",    cust:"new",         value:3200, disc:45, items:3}
+};
+
+function read(){
+  return {
+    gov:  $("gov").value,
+    cat:  $("cat").value,
+    chan: $("chan").value,
+    cust: $("cust").value,
+    value: Math.max(0, Number($("value").value) || 0),
+    disc: Number($("disc").value) || 0,
+    items: Math.max(1, Number($("items").value) || 1)
+  };
+}
+
+function render(){
+  var o = read();
+  var p = score(o), t = tierOf(p), meta = TIER[t];
+
+  $("discOut").textContent = o.disc;
+  $("vLabel").textContent = meta.label;
+  $("vLabel").style.color = meta.color;
+  $("vPct").textContent = Math.round(p * 100) + "%";
+  $("vPct").style.color = meta.color;
+  $("vBar").style.width = Math.max(2, Math.round(p * 100)) + "%";
+  $("vBar").style.background = meta.color;
+
+  var act = $("vAction");
+  act.textContent = meta.action;
+  act.style.color = meta.color;
+  act.style.background = "color-mix(in oklab, " + meta.color + " 12%, transparent)";
+
+  $("vReasons").innerHTML = reasons(o).map(function(r){
+    var arrow = r.up
+      ? '<svg class="arrow" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="' + TIER.high.color + '" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5M5 12l7-7 7 7"/></svg>'
+      : '<svg class="arrow" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="' + TIER.low.color + '" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M19 12l-7 7-7-7"/></svg>';
+    return "<li>" + arrow + "<span>" + r.text + "</span></li>";
+  }).join("");
+}
+
+["gov","cat","chan","cust","value","items","disc"].forEach(function(id){
+  $(id).addEventListener("input", function(){
+    // Any manual edit means we are no longer on a preset.
+    [].forEach.call(document.querySelectorAll(".chip"), function(c){ c.setAttribute("aria-pressed","false"); });
+    render();
+  });
+});
+
+[].forEach.call(document.querySelectorAll(".chip"), function(chip){
+  chip.addEventListener("click", function(){
+    var p = PRESETS[chip.dataset.preset];
+    $("gov").value = p.gov; $("cat").value = p.cat; $("chan").value = p.chan;
+    $("cust").value = p.cust; $("value").value = p.value; $("disc").value = p.disc;
+    $("items").value = p.items;
+    [].forEach.call(document.querySelectorAll(".chip"), function(c){ c.setAttribute("aria-pressed","false"); });
+    chip.setAttribute("aria-pressed","true");
+    render();
+  });
+});
+
+/* ---------- theme ---------- */
+(function(){
+  var saved = null;
+  try { saved = localStorage.getItem("vouch_theme"); } catch (e) {}
+  if (!saved && window.matchMedia && window.matchMedia("(prefers-color-scheme: light)").matches) saved = "light";
+  if (saved) document.documentElement.setAttribute("data-theme", saved);
+  paintIcon();
+
+  $("theme").addEventListener("click", function(){
+    var next = document.documentElement.getAttribute("data-theme") === "light" ? "dark" : "light";
+    document.documentElement.setAttribute("data-theme", next);
+    try { localStorage.setItem("vouch_theme", next); } catch (e) {}
+    paintIcon();
+  });
+
+  function paintIcon(){
+    var light = document.documentElement.getAttribute("data-theme") === "light";
+    // moon when dark, sun when light
+    $("themePath").setAttribute("d", light
+      ? "M12 17a5 5 0 1 0 0-10 5 5 0 0 0 0 10zM12 1v2M12 21v2M4.2 4.2l1.4 1.4M18.4 18.4l1.4 1.4M1 12h2M21 12h2M4.2 19.8l1.4-1.4M18.4 5.6l1.4-1.4"
+      : "M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z");
+  }
+})();
+
+/* ---------- cursor parallax on the background ---------- */
+(function(){
+  var stage = $("stage");
+  if (!stage) return;
+  if (!window.matchMedia("(hover: hover) and (pointer: fine)").matches) return;
+  if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+  var raf = 0, tx = 0, ty = 0, cx = 0, cy = 0;
+  function tick(){
+    cx += (tx - cx) * 0.045; cy += (ty - cy) * 0.045;
+    stage.style.setProperty("--mx", cx.toFixed(4));
+    stage.style.setProperty("--my", cy.toFixed(4));
+    raf = (Math.abs(tx-cx) < 0.001 && Math.abs(ty-cy) < 0.001) ? 0 : requestAnimationFrame(tick);
+  }
+  window.addEventListener("pointermove", function(e){
+    tx = (e.clientX / window.innerWidth) * 2 - 1;
+    ty = (e.clientY / window.innerHeight) * 2 - 1;
+    if (!raf) raf = requestAnimationFrame(tick);
+  }, {passive:true});
+})();
+
+/* ---------- links ---------- */
+(function(){
+  $("yr").textContent = new Date().getFullYear();
+  $("signin").href = APP_URL;
+
+  var msg = encodeURIComponent("Hi VOUCH — I run an online store in Egypt and I'd like access to the return-risk scoring.");
+  var wa = $("waBtn"), mail = $("mailBtn");
+  var mailHref = "mailto:" + CONTACT_EMAIL + "?subject=" +
+      encodeURIComponent("VOUCH access request") + "&body=" + msg;
+
+  if (WHATSAPP_NUMBER) {
+    wa.href = "https://wa.me/" + WHATSAPP_NUMBER + "?text=" + msg;
+    wa.target = "_blank"; wa.rel = "noopener";
+  } else {
+    // No number configured yet — don't ship a dead button.
+    wa.href = mailHref;
+    wa.textContent = "Request access by email";
+    mail.style.display = "none";
+  }
+  mail.href = mailHref;
+})();
+
+render();
+</script>
+</body>
+</html>
