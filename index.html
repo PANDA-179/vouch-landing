@@ -23,6 +23,10 @@
   --c1:oklch(.5 .23 var(--h1) / .7); --c2:oklch(.46 .22 var(--h2) / .55);
   --c3:oklch(.55 .15 var(--h3) / .5); --c4:oklch(.62 .2 var(--h4) / .42);
   --blend:screen; --spot:oklch(.72 .16 var(--h1) / .28); --spot-blend:screen;
+  --float-bg:color-mix(in oklab,oklch(.22 .012 285) 58%,transparent);
+  --float-rim:color-mix(in oklab,white 12%,transparent);
+  --float-edge:color-mix(in oklab,white 7%,transparent);
+  --float-lift:0 14px 36px -16px rgb(0 0 0 / .65);
   --radius:14px;
 }
 html[data-theme="light"]{
@@ -34,6 +38,10 @@ html[data-theme="light"]{
   --c1:oklch(.66 .19 var(--h1) / .78); --c2:oklch(.72 .18 var(--h2) / .62);
   --c3:oklch(.78 .13 var(--h3) / .7); --c4:oklch(.66 .2 var(--h4) / .5);
   --blend:multiply; --spot:oklch(1 0 0 / .7); --spot-blend:soft-light;
+  --float-bg:color-mix(in oklab,white 60%,transparent);
+  --float-rim:color-mix(in oklab,white 80%,transparent);
+  --float-edge:color-mix(in oklab,oklch(.2 .02 285) 8%,transparent);
+  --float-lift:0 14px 36px -16px rgb(30 30 70 / .3);
 }
 *{box-sizing:border-box}
 html{-webkit-text-size-adjust:100%; scroll-behavior:smooth}
@@ -65,7 +73,8 @@ p{margin:0}
 .layer{position:absolute; inset:0; mix-blend-mode:var(--blend);
   transform:translate3d(calc(var(--mx,0) * var(--depth,0px)),calc(var(--my,0) * var(--depth,0px)),0)}
 .l1{--depth:22px}.l2{--depth:-30px}.l3{--depth:14px}.l4{--depth:-18px}
-.field{position:absolute; border-radius:50%; will-change:transform}
+/* named aurora-field, not .field: the demo form already uses .field for its inputs */
+.aurora-field{position:absolute; border-radius:50%; will-change:transform}
 .f1{width:72vmax; height:58vmax; top:-24vmax; left:-20vmax;
   background:radial-gradient(closest-side,var(--c1),color-mix(in oklab,var(--c1) 40%,transparent) 55%,transparent)}
 .f2{width:64vmax; height:64vmax; bottom:-30vmax; right:-22vmax;
@@ -101,13 +110,25 @@ p{margin:0}
 @media (pointer:coarse){.bg-toggle{width:44px; height:44px}}
 
 /* ---------- surfaces ---------- */
-.glass{background:var(--card); -webkit-backdrop-filter:blur(20px) saturate(180%); backdrop-filter:blur(20px) saturate(180%); border-bottom:1px solid var(--line)}
+/* floating glass: tinted blur, a rim of light on top, a hairline, a soft lift */
+.glass{background:var(--float-bg); -webkit-backdrop-filter:blur(16px) saturate(1.5); backdrop-filter:blur(16px) saturate(1.5);
+  box-shadow:inset 0 1px 0 var(--float-rim), inset 0 0 0 1px var(--float-edge), var(--float-lift)}
 .card{background:var(--card); border:1px solid var(--line); border-radius:var(--radius);
   -webkit-backdrop-filter:blur(14px) saturate(150%); backdrop-filter:blur(14px) saturate(150%)}
 
 /* ---------- nav ---------- */
-nav{position:sticky; top:0; z-index:40}
-.navbar{display:flex; align-items:center; justify-content:space-between; gap:12px; height:60px}
+/* the navbar: a glass pill floating over the page, centred to the content width */
+nav{position:fixed; top:16px; inset-inline:16px; z-index:40; max-width:1112px; margin-inline:auto}
+nav .glass{border-radius:999px}
+.navbar{display:flex; align-items:center; justify-content:space-between; gap:12px; height:64px; padding-inline:20px 10px}
+.navlinks{display:flex; gap:4px; list-style:none; margin:0; padding:0}
+.navlinks a{display:block; padding:8px 14px; border-radius:999px; font-size:.9rem; text-decoration:none;
+  opacity:.62; transition:opacity .2s ease, background-color .2s ease}
+.navlinks a:hover,.navlinks a:focus-visible{opacity:1; background:color-mix(in oklab,var(--fg) 6%,transparent)}
+.navlinks a:focus-visible{outline:2px solid var(--fg); outline-offset:2px}
+@media (max-width:760px){.navlinks{display:none}}
+@media (max-width:560px){nav{top:12px; inset-inline:12px} .navbar{height:56px; padding-inline:14px 8px}}
+html{scroll-padding-top:96px}
 .brand{display:flex; align-items:center; gap:9px; font-weight:700; letter-spacing:-.02em; font-size:1.06rem; text-decoration:none}
 .mark{width:26px; height:26px; border-radius:8px; display:grid; place-items:center;
   background:linear-gradient(150deg,var(--blob2),var(--blob4)); color:#fff; font-size:.78rem; font-weight:700}
@@ -137,7 +158,7 @@ nav{position:sticky; top:0; z-index:40}
 
 /* ---------- sections ---------- */
 section{padding:clamp(56px,9vw,110px) 0}
-.hero{padding-top:clamp(40px,7vw,80px); text-align:center}
+.hero{padding-top:calc(96px + clamp(24px,5vw,64px)); text-align:center}
 .hero h1{margin:16px auto 0; max-width:16ch}
 .hero .sub{margin:20px auto 0; max-width:56ch; font-size:clamp(1rem,1.6vw,1.16rem); color:var(--muted)}
 .hero .cta{margin-top:32px; display:flex; gap:12px; justify-content:center; flex-wrap:wrap}
@@ -216,10 +237,10 @@ footer{padding:34px 0 46px; border-top:1px solid var(--line); font-size:.82rem; 
 <body>
 
 <div class="stage" aria-hidden="true" id="stage">
-  <div class="layer l1"><div class="field f1"></div></div>
-  <div class="layer l2"><div class="field f2"></div></div>
-  <div class="layer l3"><div class="field f3"></div></div>
-  <div class="layer l4"><div class="field f4"></div></div>
+  <div class="layer l1"><div class="aurora-field f1"></div></div>
+  <div class="layer l2"><div class="aurora-field f2"></div></div>
+  <div class="layer l3"><div class="aurora-field f3"></div></div>
+  <div class="layer l4"><div class="aurora-field f4"></div></div>
   <div class="spot"></div><div class="veil"></div><div class="grain"></div>
 </div>
 <button type="button" class="bg-toggle" id="bgToggle" hidden aria-pressed="false"
@@ -230,6 +251,11 @@ footer{padding:34px 0 46px; border-top:1px solid var(--line); font-size:.82rem; 
     <div class="wrap">
       <div class="navbar">
         <a class="brand" href="#top"><span class="mark" aria-hidden="true"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l7 3v6c0 4.5-3 7.5-7 9-4-1.5-7-4.5-7-9V6z"/></svg></span>VOUCH</a>
+        <ul class="navlinks">
+          <li><a href="#how">How it works</a></li>
+          <li><a href="#demo">Try it</a></li>
+          <li><a href="#access">Get access</a></li>
+        </ul>
         <div class="navactions">
           <button class="icon-btn" id="theme" aria-label="Toggle dark mode" title="Toggle dark mode">
             <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path id="themePath" d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
