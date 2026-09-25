@@ -376,6 +376,8 @@ footer{padding:34px 0 46px; border-top:1px solid var(--line); font-size:.82rem; 
 var WHATSAPP_NUMBER = "201030808048";
 var CONTACT_EMAIL   = "vouch.ytp@gmail.com";
 var APP_URL         = "https://vouch-web-c4pw.onrender.com/admin/login";
+// The app's API health check. Only used to wake the servers early (see "wake").
+var API_HEALTH_URL  = "https://vouch-api-qji3.onrender.com/health";
 
 /* ----------------------------------------------------------------------------
    DEMO MODEL
@@ -608,6 +610,19 @@ function render(){
   document.documentElement.addEventListener("pointerleave", function(){ delete stage.dataset.pointer; });
   if (reduced.addEventListener) reduced.addEventListener("change", apply);
   apply();
+})();
+
+/* ---------- wake ----------
+   The app runs on Render's free plan, which sleeps when idle and takes up to a
+   minute to wake. Knock on both servers (the web app and its API) as soon as
+   someone lands here, so they are up, or nearly, by the time they click Sign in.
+   "no-cors": we only need the request to arrive, not to read the reply. */
+(function(){
+  if (!window.fetch) return;
+  var webHealth = APP_URL.replace(/^(https?:\/\/[^\/]+).*$/, "$1") + "/vouch/health";
+  [webHealth, API_HEALTH_URL].forEach(function(u){
+    fetch(u, { mode: "no-cors", cache: "no-store", credentials: "omit" }).catch(function(){});
+  });
 })();
 
 /* ---------- links ---------- */
