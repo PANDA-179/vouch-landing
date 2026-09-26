@@ -314,7 +314,9 @@ html[dir="rtl"] .btn .flip{transform:scaleX(-1)}
 .fl-tile p{color:var(--muted); font-size:.95rem}
 .fl-tile .name{font-family:Inter,sans-serif; font-weight:700; font-size:.9rem; color:var(--accept); direction:ltr; text-align:start}
 .fl-order{grid-column:span 6; background:color-mix(in oklab,var(--accept) 9%,var(--card))}
-.fl-order img{margin-top:10px; width:100%; border-radius:12px; border:1px solid var(--line)}
+.fl-order a{display:block; margin-top:10px}
+/* height:auto: the width/height attributes only reserve the ratio, the picture must never be stretched */
+.fl-order img{width:100%; height:auto; border-radius:12px; border:1px solid var(--line)}
 .fl-invoice,.fl-report{grid-column:span 3}
 .fl-invoice img{margin-top:auto; margin-bottom:-26px; width:100%; height:300px; object-fit:cover; object-position:top center; border-radius:12px 12px 0 0; border:1px solid var(--line); border-bottom:0}
 .fl-tg{margin-top:auto; border-radius:12px; padding:13px 15px; font-size:.8rem; line-height:1.65; white-space:pre-line; direction:ltr; text-align:left;
@@ -468,7 +470,7 @@ html[dir="rtl"] .fl-address{padding:8px 14px 8px 8px}
     <div class="fl-bento">
       <article class="card fl-tile fl-order">
         <span class="name">OrderFlow</span><h3>Order confirmation on WhatsApp</h3><p>A confirmation message for every cash order, alerts for changes and no-replies, and an optional copy in Google Sheets.</p>
-        <img src="../img/order-flow.png" alt="The OrderFlow workflow in n8n: from a new order to the WhatsApp message and the alert" loading="lazy" width="1600" height="560">
+        <a href="../img/order-flow.png" target="_blank" rel="noopener" title="Open the full-size picture"><img src="../img/order-flow.png" alt="The OrderFlow workflow in n8n: from a new order to the WhatsApp message and the alert" loading="lazy" width="2121" height="578"></a>
       </article>
       <article class="card fl-tile fl-invoice">
         <span class="name">InvoiceFlow</span><h3>Supplier invoices without typing</h3><p>Snap the invoice and upload it. The numbers are read and checked, and wrong totals or duplicates show up on their own.</p>
