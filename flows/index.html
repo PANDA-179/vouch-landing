@@ -322,6 +322,17 @@ html[dir="rtl"] .btn .flip{transform:scaleX(-1)}
 .fl-tg{margin-top:auto; border-radius:12px; padding:13px 15px; font-size:.8rem; line-height:1.65; white-space:pre-line; direction:ltr; text-align:left;
   background:color-mix(in oklab,var(--bg) 55%,transparent); border:1px solid var(--line); font-variant-numeric:tabular-nums}
 
+/* who it is for: a 2x2 of business types, each tagged with the packs that fit */
+.fl-lead{margin-top:10px; color:var(--muted); max-width:60ch}
+.fl-who{display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-top:28px}
+.fl-who article{padding:22px; display:grid; grid-template-columns:auto 1fr; gap:16px; align-items:start}
+.fl-who .ic{width:44px; height:44px; border-radius:12px; display:grid; place-items:center;
+  background:color-mix(in oklab,var(--accept) 16%,transparent); color:var(--accept)}
+.fl-who p{color:var(--muted); font-size:.93rem; margin-top:6px}
+.fl-tags{display:flex; flex-wrap:wrap; gap:6px; margin-top:12px}
+.fl-tags span{font-size:.74rem; font-weight:600; padding:3px 10px; border-radius:999px; border:1px solid var(--line-strong); color:var(--fg)}
+.fl-tags .soon{border-color:color-mix(in oklab,var(--accept) 50%,transparent); color:var(--accept)}
+@media (max-width:760px){.fl-who{grid-template-columns:1fr}}
 .fl-tools{text-align:center}
 .fl-tools p{color:var(--muted); margin-top:8px}
 .fl-logos{display:flex; flex-wrap:wrap; justify-content:center; gap:40px; margin-top:28px}
@@ -491,6 +502,21 @@ Return rate: - · Cash on delivery: 80%
     </div>
   </section>
 
+  <section id="who" class="wrap">
+    <h2>مش بس للمتاجر الأونلاين</h2>
+    <p class="lead fl-lead">أي بيزنس بيتعامل مع أوردرات أو حجوزات أو فواتير موردين ممكن يستفيد.</p>
+    <div class="fl-who">
+      <article class="card"><span class="ic"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 8h14l-1 12H6L5 8z"/><path d="M9 8V6a3 3 0 0 1 6 0v2"/></svg></span><div><h3>متاجر الأونلاين</h3><p>كل أوردر دفع عند الاستلام بيتأكد قبل الشحن، الفواتير بتتراجع لوحدها، وتقرير المبيعات كل يوم الصبح.</p>
+        <div class="fl-tags"><span dir="ltr">OrderFlow</span><span dir="ltr">InvoiceFlow</span><span dir="ltr">ReportFlow</span></div></div></article>
+      <article class="card"><span class="ic"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 10v10h16V10"/><path d="M3 10l2-6h14l2 6"/><path d="M3 10a3 3 0 0 0 6 0 3 3 0 0 0 6 0 3 3 0 0 0 6 0"/><path d="M10 20v-5h4v5"/></svg></span><div><h3>المطاعم والكافيهات والصيدليات والمحلات</h3><p>فواتير الموردين بتتقري وتتراجع لوحدها، وتقرير مبيعات يومي من ملف الكاشير، بنظبطه على نشاطك.</p>
+        <div class="fl-tags"><span dir="ltr">InvoiceFlow</span><span dir="ltr">ReportFlow</span></div></div></article>
+      <article class="card"><span class="ic"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/><path d="M9 15l2 2 4-4"/></svg></span><div><h3>العيادات والصالونات والمراكز</h3><p>رسالة واتساب بتأكد الحجز قبل ميعاده، والعميل يأكد أو يغيّر الميعاد، واللي مردش توصلك لستته.</p>
+        <div class="fl-tags"><span class="soon">نسخة الحجوزات: قريباً</span></div></div></article>
+      <article class="card"><span class="ic"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 21V5a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v16"/><path d="M16 10h2a2 2 0 0 1 2 2v9"/><path d="M8 7h4M8 11h4M8 15h4M3 21h18"/></svg></span><div><h3>أي شركة أو مصنع أو مكتب</h3><p>كل فواتير الموردين في مكان واحد، الغلط في الحسابات والتكرار بيبان، وتقرير مصاريف كل شهر.</p>
+        <div class="fl-tags"><span dir="ltr">InvoiceFlow</span></div></div></article>
+    </div>
+  </section>
+
   <section class="wrap fl-tools">
     <h2>بيشتغل مع الأدوات اللي بتستخدمها</h2>
     <p>وكله على n8n بتاعك: بيانات عملائك بتفضل عندك.</p>
@@ -551,6 +577,7 @@ Return rate: - · Cash on delivery: 80%
     <h2>أسئلة بتتسأل كتير</h2>
     <div class="fl-faq">
       <details class="card"><summary>محتاج أعرف برمجة؟</summary><p>لو اخترت "أركّبهولك" لأ خالص، احنا بنركّب وبنسلّمك كل حاجة شغالة. لو اخترت "ركّبه بنفسك" محتاج تكون بتعرف تستخدم n8n، والدليل بيمشيك خطوة بخطوة.</p></details>
+      <details class="card"><summary>ينفع لو معنديش متجر أونلاين؟</summary><p>أيوه. InvoiceFlow ينفع لأي بيزنس عنده فواتير موردين، و ReportFlow بياخد ملف مبيعات Excel من سيستم الكاشير بتاعك. ونسخة لتأكيد الحجوزات للعيادات والصالونات جاية قريب.</p></details>
       <details class="card"><summary>يعني إيه n8n؟ ولازم يكون عندي؟</summary><p>n8n هو البرنامج اللي بيشغّل الأدوات دي. ممكن يبقى على سيرفرك، أو على n8n Cloud، أو عندنا ضمن الصيانة الشهرية.</p></details>
       <details class="card"><summary>رسايل الواتساب بتكلف كام؟</summary><p>Meta بتحاسب على كل رسالة تأكيد: حوالي 0.0036 دولار لرقم مصري، وعليها 14% ضريبة (أسعار سبتمبر 2026). يعني حوالي 20 قرش للأوردر، أقل بكتير من تمن مرتجع واحد.</p></details>
       <details class="card"><summary>بيشتغل مع Easy Orders أو شيت Excel؟</summary><p>ReportFlow بياخد أي ملف CSV أو Excel، بأسامي أعمدة عربي أو إنجليزي. OrderFlow محتاج السيستم يبعت الأوردر أول ما يتعمل. لو السيستم بتاعك مش بيبعت، كلمنا ونشوف الحل.</p></details>

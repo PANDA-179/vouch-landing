@@ -322,6 +322,17 @@ html[dir="rtl"] .btn .flip{transform:scaleX(-1)}
 .fl-tg{margin-top:auto; border-radius:12px; padding:13px 15px; font-size:.8rem; line-height:1.65; white-space:pre-line; direction:ltr; text-align:left;
   background:color-mix(in oklab,var(--bg) 55%,transparent); border:1px solid var(--line); font-variant-numeric:tabular-nums}
 
+/* who it is for: a 2x2 of business types, each tagged with the packs that fit */
+.fl-lead{margin-top:10px; color:var(--muted); max-width:60ch}
+.fl-who{display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-top:28px}
+.fl-who article{padding:22px; display:grid; grid-template-columns:auto 1fr; gap:16px; align-items:start}
+.fl-who .ic{width:44px; height:44px; border-radius:12px; display:grid; place-items:center;
+  background:color-mix(in oklab,var(--accept) 16%,transparent); color:var(--accept)}
+.fl-who p{color:var(--muted); font-size:.93rem; margin-top:6px}
+.fl-tags{display:flex; flex-wrap:wrap; gap:6px; margin-top:12px}
+.fl-tags span{font-size:.74rem; font-weight:600; padding:3px 10px; border-radius:999px; border:1px solid var(--line-strong); color:var(--fg)}
+.fl-tags .soon{border-color:color-mix(in oklab,var(--accept) 50%,transparent); color:var(--accept)}
+@media (max-width:760px){.fl-who{grid-template-columns:1fr}}
 .fl-tools{text-align:center}
 .fl-tools p{color:var(--muted); margin-top:8px}
 .fl-logos{display:flex; flex-wrap:wrap; justify-content:center; gap:40px; margin-top:28px}
@@ -491,6 +502,21 @@ Return rate: - · Cash on delivery: 80%
     </div>
   </section>
 
+  <section id="who" class="wrap">
+    <h2>Not just for online stores</h2>
+    <p class="lead fl-lead">Any business that handles orders, bookings or supplier invoices can use it.</p>
+    <div class="fl-who">
+      <article class="card"><span class="ic"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 8h14l-1 12H6L5 8z"/><path d="M9 8V6a3 3 0 0 1 6 0v2"/></svg></span><div><h3>Online stores</h3><p>Every cash-on-delivery order confirmed before shipping, invoices checked on their own, and a sales report every morning.</p>
+        <div class="fl-tags"><span dir="ltr">OrderFlow</span><span dir="ltr">InvoiceFlow</span><span dir="ltr">ReportFlow</span></div></div></article>
+      <article class="card"><span class="ic"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 10v10h16V10"/><path d="M3 10l2-6h14l2 6"/><path d="M3 10a3 3 0 0 0 6 0 3 3 0 0 0 6 0 3 3 0 0 0 6 0"/><path d="M10 20v-5h4v5"/></svg></span><div><h3>Restaurants, cafes, pharmacies and shops</h3><p>Supplier invoices read and checked on their own, and a daily sales report from your cashier export, tuned to your business.</p>
+        <div class="fl-tags"><span dir="ltr">InvoiceFlow</span><span dir="ltr">ReportFlow</span></div></div></article>
+      <article class="card"><span class="ic"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/><path d="M9 15l2 2 4-4"/></svg></span><div><h3>Clinics, salons and centers</h3><p>A WhatsApp message confirms each booking before the appointment, the customer confirms or reschedules, and you get the list of no-replies.</p>
+        <div class="fl-tags"><span class="soon">Bookings version: coming soon</span></div></div></article>
+      <article class="card"><span class="ic"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 21V5a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v16"/><path d="M16 10h2a2 2 0 0 1 2 2v9"/><path d="M8 7h4M8 11h4M8 15h4M3 21h18"/></svg></span><div><h3>Any company, factory or office</h3><p>All supplier invoices in one place, maths mistakes and duplicates flagged, and a monthly expenses report.</p>
+        <div class="fl-tags"><span dir="ltr">InvoiceFlow</span></div></div></article>
+    </div>
+  </section>
+
   <section class="wrap fl-tools">
     <h2>Works with the tools you already use</h2>
     <p>All on your own n8n: your customers’ data stays with you.</p>
@@ -551,6 +577,7 @@ Return rate: - · Cash on delivery: 80%
     <h2>Questions people ask</h2>
     <div class="fl-faq">
       <details class="card"><summary>Do I need to know how to code?</summary><p>Not with "We set it up": we install it and hand everything over working. With "Install it yourself" you need to be comfortable with n8n, and the guide walks you through it step by step.</p></details>
+      <details class="card"><summary>Does it work if I don’t have an online store?</summary><p>Yes. InvoiceFlow fits any business with supplier invoices, and ReportFlow takes a sales export (Excel) from your cashier system. A version that confirms bookings for clinics and salons is coming soon.</p></details>
       <details class="card"><summary>What is n8n, and do I need it?</summary><p>n8n is the automation tool these packs run on. It can run on your own server, on n8n Cloud, or with us as part of the monthly maintenance.</p></details>
       <details class="card"><summary>How much do the WhatsApp messages cost?</summary><p>Meta charges for each confirmation message: about $0.0036 to an Egyptian number, plus 14% VAT (September 2026 prices). That is about 20 piasters per order, far less than one return.</p></details>
       <details class="card"><summary>Does it work with Easy Orders or an Excel sheet?</summary><p>ReportFlow takes any CSV or Excel file, with Arabic or English column names. OrderFlow needs your system to send each order as it is placed. If yours can’t, message us and we will find a way.</p></details>
